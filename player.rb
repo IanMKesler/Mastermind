@@ -6,4 +6,8 @@ class Player
     @role = role
     @pattern = []
   end
+
+  def showPattern
+    @pattern.join("")
+  end
 end
