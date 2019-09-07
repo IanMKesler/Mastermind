@@ -15,9 +15,10 @@ class Game
     while @turn <= 12
       @board.show
       hint if @turn > 1
+      @maker.showPattern
       puts "Please input guess"
       getGuess
-      @board.draw(@breaker.pattern)
+      @board.draw(@breaker.pattern, @turn)
       if win?
         @board.show
         puts "Nice! The breaker got it!"
@@ -34,9 +35,8 @@ class Game
   private
 
   def generateSecret
-    @maker.pattern.map! { |x|
-      x = rand(6)
-    }
+    4.times { @maker.pattern << rand(5) }
+    puts @maker.showPattern
   end
 
   def getGuess
@@ -51,19 +51,22 @@ class Game
   def formatGuess
     guess = gets
     output = guess.scan /[0-5]/
-    output
+    output.map { |x| x.to_i }
   end
 
   def win?
+    puts "Breaker: #{@breaker.pattern}"
+    puts "Maker: #{@maker.pattern}"
+    puts "Win?: #{@breaker.pattern == @maker.pattern}"
     @breaker.pattern == @maker.pattern ? true : false
   end
 
   def hint
-    ouput = compare([@maker.pattern, @breaker.pattern])
+    output = compare([@maker.pattern, @breaker.pattern])
     puts "#{output[0]} are correct. #{output[1]} correct numbers but in the wrong position."
   end
 
-  def compare(input)
+  def compare(input) #appears to modify maker
     maker = input[0]
     breaker = input[1]
     output = [0, 0]

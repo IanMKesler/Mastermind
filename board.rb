@@ -1,5 +1,5 @@
 class Board
-  attr_reader :board
+  attr_accessor :board
 
   def initialize(game)
     @game = game
@@ -8,13 +8,8 @@ class Board
     create(@game)
   end
 
-  def draw(pattern)
-    @board.each { |row|
-      if row[0] == 0
-        row = pattern
-        break
-      end
-    }
+  def draw(pattern, turn)
+    @board[turn-1] = pattern
   end
 
   def show
