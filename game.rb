@@ -66,23 +66,24 @@ class Game
     puts "#{output[0]} are correct. #{output[1]} correct numbers but in the wrong position."
   end
 
-  def compare(input) #appears to modify maker
-    maker = input[0]
-    breaker = input[1]
+  def compare(input) 
+    code = input[0].dup #Arrays are not POD types, need to make a shallow copy to avoid changing original.
+    guess = input[1].dup
     output = [0, 0]
-    maker.each_with_index { |x, i|
-      if breaker[i] == x
+    code.each_with_index { |x, i|
+      if guess[i] == x
         output[0] += 1
-        maker[i] = nil
-        breaker[i] = nil
+        code[i] = nil
+        guess[i] = nil
       end
     }
-    maker = maker.select { |x| x != nil }
-    breaker = breaker.select { |x| x != nil }
-    maker.each_with_index { |x, i|
-      if breaker.include?(x)
+    puts "Maker after compare: #{@maker.pattern}"
+    code = code.select { |x| x != nil }
+    guess = guess.select { |x| x != nil }
+    code.each_with_index { |x, i|
+      if guess.include?(x)
         output[1] += 1
-        breaker[breaker.index(x)] = nil
+        guess[guess.index(x)] = nil
       end
     }
     output
