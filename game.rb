@@ -11,32 +11,34 @@ class Game
 
   def play
     puts "Welcome to Mastermind! Input (M) to play as the code maker or (B) to play as the code breaker."
-    getRole == "M" ? @maker.player = true : @breaker.player = true
+    get_role == "M" ? @maker.player = true : @breaker.player = true
+    puts
     puts "Selecting Secret Pattern"
-    @maker.player ? @maker.pattern = getPattern : generateSecret
+    @maker.player ? @maker.pattern = get_pattern : generate_secret
     while @turn <= 12
+      puts
       @board.show
       hints = [0, 0]
       hints = hint if @turn > 1
       puts "Please input guess"
-      @breaker.player ? @breaker.pattern = getPattern : generateGuess(hints)
+      @breaker.player ? @breaker.pattern = get_pattern : generate_guess(hints)
       @board.draw(@breaker.pattern.dup, @turn)
       if win?
         @board.show
         puts "Nice! The breaker got it!"
-        puts "The correct code is #{@maker.showPattern}"
+        puts "The correct code is #{@maker.show_pattern}"
         return
       else
         @turn += 1
       end
     end
     puts "Better luck next time, breaker. The maker wins!"
-    puts "The correct code is #{@maker.showPattern}"
+    puts "The correct code is #{@maker.show_pattern}"
   end
 
   private
 
-  def getRole
+  def get_role
     input = gets.strip.upcase
     until input.match(/[MB]/)
       puts "Please input either M or B and press enter."
@@ -45,49 +47,49 @@ class Game
     input
   end
 
-  def generateGuess(hints)
+  def generate_guess(hints)
     correct = hints[0]
-    color = hints[1]
+    correct_number = hints[1]
     indexes = [0, 1, 2, 3]
     positions = indexes.sample(correct)
     placements = (indexes - positions)
-    colors = placements.sample(color)
+    correct_number_indexes = placements.sample(correct_number)
     keep = {}
 
     @breaker.pattern = [0, 0, 0, 0] if @breaker.pattern == []
-    @breaker.pattern.map!.with_index { |x, i|
-      if positions.include?(i)
-        puts "Keeping #{x} in position #{i + 1}."
-        x
+    @breaker.pattern.map!.with_index { |number, index|
+      if positions.include?(index)
+        puts "Keeping #{number} in position #{index + 1}."
+        number
       else
-        keep[x] = i if colors.include?(i)
-        x = rand(5)
+        keep[number] = index if correct_number_indexes.include?(index)
+        number = rand(6)
       end
     }
 
     keep.each { |number, index|
-      i = (placements - [index]).sample
-      puts "Putting #{number} in position #{i + 1}."
-      @breaker.pattern[i] = color
-      placements -= [i]
+      placement_index = (placements - [index]).sample
+      puts "Putting #{number} in position #{placement_index + 1}."
+      @breaker.pattern[placement_index] = number
+      placements -= [placement_index]
     }
-    puts @breaker.showPattern
+    puts @breaker.show_pattern
   end
 
-  def generateSecret
-    4.times { @maker.pattern << rand(5) }
+  def generate_secret
+    4.times { @maker.pattern << rand(6) }
   end
 
-  def getPattern
-    pattern = formatPattern
+  def get_pattern
+    pattern = format_pattern
     until pattern.length == 4
       puts "Please input four numbers from 0-5. Ex: 0254"
-      pattern = formatPattern
+      pattern = format_pattern
     end
     pattern
   end
 
-  def formatPattern
+  def format_pattern
     pattern = gets
     output = pattern.scan /[0-5]/
     output.map { |x| x.to_i }
@@ -98,28 +100,28 @@ class Game
   end
 
   def hint
-    output = compare([@maker.pattern, @breaker.pattern])
-    puts "#{output[0]} are correct. #{output[1]} correct numbers but in the wrong position."
-    output
+    hints = compare([@maker.pattern, @breaker.pattern])
+    puts "#{hints[0]} are correct. #{hints[1]} correct numbers but in the wrong position."
+    hints
   end
 
   def compare(input)
-    code = input[0].dup #Arrays are not POD types, need to make a shallow copy to avoid changing original.
-    guess = input[1].dup
+    maker_pattern = input[0].dup #Arrays are not POD types, need to make a shallow copy to avoid changing original.
+    breaker_pattern = input[1].dup
     output = [0, 0]
-    code.each_with_index { |x, i|
-      if guess[i] == x
+    maker_pattern.each_with_index { |number, index|
+      if breaker_pattern[index] == number
         output[0] += 1
-        code[i] = nil
-        guess[i] = nil
+        maker_pattern[index] = nil
+        breaker_pattern[index] = nil
       end
     }
-    code = code.select { |x| x != nil }
-    guess = guess.select { |x| x != nil }
-    code.each_with_index { |x, i|
-      if guess.include?(x)
+    maker_pattern = maker_pattern.select { |number| number != nil }
+    breaker_pattern = breaker_pattern.select { |number| number != nil }
+    maker_pattern.each { |number|
+      if breaker_pattern.include?(number)
         output[1] += 1
-        guess[guess.index(x)] = nil
+        breaker_pattern[breaker_pattern.index(number)] = nil
       end
     }
     output

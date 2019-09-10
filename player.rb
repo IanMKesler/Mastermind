@@ -8,7 +8,7 @@ class Player
     @player = false
   end
 
-  def showPattern
+  def show_pattern
     @pattern.join("")
   end
 end
