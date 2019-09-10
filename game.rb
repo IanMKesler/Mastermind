@@ -15,10 +15,8 @@ class Game
     puts "Selecting Secret Pattern"
     @maker.player ? @maker.pattern = getPattern : generateSecret
     while @turn <= 12
-      #puts "Pattern: #{@maker.pattern}"
-      puts "Code goes here #{@maker.showPattern}"  #for testing
       @board.show
-      hints = [0,0]
+      hints = [0, 0]
       hints = hint if @turn > 1
       puts "Please input guess"
       @breaker.player ? @breaker.pattern = getPattern : generateGuess(hints)
@@ -52,20 +50,32 @@ class Game
     color = hints[1]
     indexes = [0, 1, 2, 3]
     positions = indexes.sample(correct)
-    puts "Positions: #{positions}"
+    placements = (indexes - positions)
+    colors = placements.sample(color)
+    keep = {}
 
     @breaker.pattern = [0, 0, 0, 0] if @breaker.pattern == []
     @breaker.pattern.map!.with_index { |x, i|
-      positions.include?(i) ? x : x = rand(5)
+      if positions.include?(i)
+        puts "Keeping #{x} in position #{i + 1}."
+        x
+      else
+        keep[x] = i if colors.include?(i)
+        x = rand(5)
+      end
     }
 
-    
+    keep.each { |number, index|
+      i = (placements - [index]).sample
+      puts "Putting #{number} in position #{i + 1}."
+      @breaker.pattern[i] = color
+      placements -= [i]
+    }
     puts @breaker.showPattern
   end
 
   def generateSecret
     4.times { @maker.pattern << rand(5) }
-    #puts "Secret Code: #{@maker.showPattern}" #for testing
   end
 
   def getPattern
@@ -84,9 +94,6 @@ class Game
   end
 
   def win?
-    puts "Breaker: #{@breaker.pattern}"
-    #puts "Maker: #{@maker.pattern}"
-    #puts "Win?: #{@breaker.pattern == @maker.pattern}"
     @breaker.pattern == @maker.pattern ? true : false
   end
 
@@ -107,7 +114,6 @@ class Game
         guess[i] = nil
       end
     }
-    #puts "Maker after compare: #{@maker.pattern}"
     code = code.select { |x| x != nil }
     guess = guess.select { |x| x != nil }
     code.each_with_index { |x, i|
